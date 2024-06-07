@@ -551,27 +551,6 @@ NSData *cellDividerData;
 - (BOOL)enablePlayerBarForVerticalVideoWhenControlsHiddenInFullscreen { return YES; }
 %end
 
-// YTNoTracking - @arichornlover - https://github.com/arichornlover/YTNoTracking/
-%hook UIPasteboard
-- (void)setString:(NSString *)string {
-    // Check if the shared string is a YouTube URL
-    if ([string containsString:@"youtu"]) {
-        NSError *error = NULL;
-        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"youtu\\.be\\/(\\w+)" options:NSRegularExpressionCaseInsensitive error:&error];
-        NSArray *matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])]; 
-        for (NSTextCheckingResult *match in matches) {
-            NSRange videoIDRange = [match rangeAtIndex:1];
-            NSString *videoID = [string substringWithRange:videoIDRange];
-            NSRange timeRange = [string rangeOfString:@"t=" options:NSBackwardsSearch];
-            NSString *sanitizedURL = [NSString stringWithFormat:@"https://youtu.be/%@%@", videoID, [string substringFromIndex:timeRange.location]];
-            %orig(sanitizedURL);
-            return;
-        }
-    } 
-    %orig(string);
-}
-%end
-
 // YTNoPaidPromo: https://github.com/PoomSmart/YTNoPaidPromo
 %hook YTMainAppVideoPlayerOverlayViewController
 - (void)setPaidContentWithPlayerData:(id)data {
@@ -1786,6 +1765,7 @@ static BOOL findCell(ASNodeController *nodeController, NSArray <NSString *> *ide
     }
     if (![allKeys containsObject:@"uYouAdBlockingWorkaroundLite_enabled"]) { 
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"uYouAdBlockingWorkaroundLite_enabled"];
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"uYouAdBlockingWorkaround_enabled"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"removeYouTubeAds"];
     }
     if (![allKeys containsObject:@"uYouAdBlockingWorkaround_enabled"]) { 
